@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"user/models"
 	"user/repositories"
 	"user/utils"
@@ -31,7 +32,7 @@ func (u *user) CreateUser(body *models.Body) (token models.Token, err error) {
 	validateBody := &struct {
 		UserName string `validate:"required"`
 		Password string `validate:"required"`
-		email    string `validate:"required,email"`
+		Email    string `validate:"required,email"`
 	}{
 		body.UserName,
 		body.Password,
@@ -41,6 +42,13 @@ func (u *user) CreateUser(body *models.Body) (token models.Token, err error) {
 
 	if errors := validate.Struct(validateBody); errors != nil {
 		errStr := "Bad request: "
+		bodyT := reflect.TypeOf(*body)
+		keyTags := map[string]string{}
+
+		for i := 0; i < bodyT.NumField(); i++ {
+			field := bodyT.Field(i)
+			keyTags[field.Name] = field.Tag.Get("json")
+		}
 
 		for idx, errs := range errors.(validator.ValidationErrors) {
 			separate := ""
@@ -49,7 +57,7 @@ func (u *user) CreateUser(body *models.Body) (token models.Token, err error) {
 				separate = ","
 			}
 
-			errStr = fmt.Sprintf("%s%s%s", errStr, errs.Namespace(), separate)
+			errStr = fmt.Sprintf("%s%s%s=%s", errStr, separate, keyTags[errs.Namespace()], errs.ActualTag())
 		}
 
 		return models.Token(""), fmt.Errorf(errStr)

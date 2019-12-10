@@ -2,6 +2,7 @@ package domain
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -41,14 +42,16 @@ func (u *user) Register(writer http.ResponseWriter, req *http.Request) {
 	token, err := u.CreateUser(body)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		switch {
 		case strings.HasPrefix(err.Error(), "Duplicate: "):
 			{
 				errDuplicate := map[string]string{}
 				errKey := strings.TrimPrefix(err.Error(), "Duplicate: ")
 
-				for _, key := range strings.Split(errKey, ",") {
-					errDuplicate[strings.Trim(key, " ")] = "duplicate."
+				for _, elm := range strings.Split(errKey, ",") {
+					e := strings.Split(elm, "=")
+					errDuplicate[e[0]] = e[1]
 				}
 
 				json, _ := json.Marshal(errDuplicate)
@@ -62,8 +65,9 @@ func (u *user) Register(writer http.ResponseWriter, req *http.Request) {
 				required := map[string]string{}
 				errKey := strings.TrimPrefix(err.Error(), "Bad request: ")
 
-				for _, key := range strings.Split(errKey, ",") {
-					required[strings.Trim(key, " ")] = "required"
+				for _, elm := range strings.Split(errKey, ",") {
+					e := strings.Split(elm, "=")
+					required[e[0]] = e[1]
 				}
 
 				json, _ := json.Marshal(required)

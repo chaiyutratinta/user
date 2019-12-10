@@ -50,7 +50,7 @@ func (db *dataBase) InsertUser(user *models.User) (err error) {
 				separate = ","
 			}
 
-			duplicate = fmt.Sprintf("%s%s%s", duplicate, key, separate)
+			duplicate = fmt.Sprintf("%s%s%s=%s", duplicate, separate, key, "duplicated.")
 		}
 
 		return fmt.Errorf(duplicate)

@@ -10,7 +10,7 @@ type User struct {
 type Body struct {
 	UserName string `json:"user_name"`
 	Password string `json:"password"`
-	Email    string `josn:"email"`
+	Email    string `json:"email"`
 }
 
 type Token string
