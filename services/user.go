@@ -40,15 +40,19 @@ func (u *user) CreateUser(body *models.Body) (token models.Token, err error) {
 	validate := validator.New()
 
 	if errors := validate.Struct(validateBody); errors != nil {
-		errStr := ""
+		errStr := "Bad request: "
 
 		for idx, errs := range errors.(validator.ValidationErrors) {
-			if idx == 0 {
-				errStr = fmt.Sprintf("bad request: %s, ", errs.Namespace())
-			} else {
-				errStr = fmt.Sprintf("%s%s ,", errStr, errs.Namespace())
+			separate := ""
+
+			if idx > 0 {
+				separate = ","
 			}
+
+			errStr = fmt.Sprintf("%s%s%s", errStr, errs.Namespace(), separate)
 		}
+
+		return models.Token(""), fmt.Errorf(errStr)
 	}
 
 	userID := (uuid.New()).String()

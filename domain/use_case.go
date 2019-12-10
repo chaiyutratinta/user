@@ -57,6 +57,21 @@ func (u *user) Register(writer http.ResponseWriter, req *http.Request) {
 
 				return
 			}
+		case strings.HasPrefix(err.Error(), "Bad request: "):
+			{
+				required := map[string]string{}
+				errKey := strings.TrimPrefix(err.Error(), "Bad request: ")
+
+				for _, key := range strings.Split(errKey, ",") {
+					required[strings.Trim(key, " ")] = "required"
+				}
+
+				json, _ := json.Marshal(required)
+				writer.WriteHeader(http.StatusBadRequest)
+				writer.Write(json)
+
+				return
+			}
 		default:
 			{
 				log.Println(err)
