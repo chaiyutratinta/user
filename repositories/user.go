@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"user/configs"
 	"user/models"
 
 	"github.com/jinzhu/gorm"
@@ -20,7 +21,9 @@ type dataBase struct {
 }
 
 func New() DB {
-	db, err := gorm.Open("mysql", "admin:nimda@(localhost:3306)/users")
+	conf := configs.Config.Database
+	dbConf := fmt.Sprintf(`%s:%s@(%s)/%s`, conf.Username, conf.Password, conf.Server, conf.DatabaseName)
+	db, err := gorm.Open("mysql", dbConf)
 
 	if err != nil {
 		log.Fatal(err)

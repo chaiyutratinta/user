@@ -1,17 +1,29 @@
-version: '3.1'
+version: "3.1"
 
 services:
+  db:
+    image: mariadb
+    container_name: user_db
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_PASSWORD: nimda
+      MYSQL_USER: admin
+      MYSQL_DATABASE: users
+    volumes:
+      - "./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql"
+    networks:
+      - users
+  app:
+    build: ./
+    container_name: users_app
+    ports:
+      - "8080:8080"
+    networks:
+      - users
 
-    db:
-        image: mariadb
-        container_name: user_db
-        ports:
-            - "3306:3306"
-        restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: toor
-            MYSQL_PASSWORD: nimda
-            MYSQL_USER: admin
-            MYSQL_DATABASE: users
-        volumes:
-            - "./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql"
+networks:
+  users:
+    driver: bridge
