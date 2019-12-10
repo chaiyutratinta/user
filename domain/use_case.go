@@ -11,6 +11,7 @@ import (
 
 type User interface {
 	Register(w http.ResponseWriter, r *http.Request)
+	Login(w http.ResponseWriter, r *http.Request)
 }
 
 type user struct {
@@ -25,7 +26,7 @@ func New(serv services.UserServices) (u User) {
 	return
 }
 
-func (u user) Register(writer http.ResponseWriter, req *http.Request) {
+func (u *user) Register(writer http.ResponseWriter, req *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	body := &models.Body{}
 
@@ -74,4 +75,38 @@ func (u user) Register(writer http.ResponseWriter, req *http.Request) {
 	writer.Write(res)
 
 	return
+}
+
+func (u *user) Login(writer http.ResponseWriter, req *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+	body := &models.Body{}
+
+	if err := json.NewDecoder(req.Body).Decode(body); err != nil {
+		defer req.Body.Close()
+
+		writer.WriteHeader(http.StatusBadRequest)
+
+		return
+	}
+
+	token, ok := u.ValidateUser(body)
+
+	if !ok {
+		json, _ := json.Marshal(map[string]string{
+			"error": "incorrect.",
+		})
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write(json)
+
+		return
+	}
+
+	json, _ := json.Marshal(map[string]models.Token{
+		"token": token,
+	})
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(json)
+
+	return
+
 }

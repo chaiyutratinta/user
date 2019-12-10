@@ -17,6 +17,7 @@ func New() (routers *mux.Router) {
 	user := domain.New(serv)
 
 	routers.HandleFunc("/register", user.Register).Methods(http.MethodPost)
+	routers.HandleFunc("/login", user.Login).Methods(http.MethodPost)
 
 	return
 }

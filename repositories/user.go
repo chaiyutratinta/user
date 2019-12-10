@@ -12,6 +12,7 @@ import (
 
 type DB interface {
 	InsertUser(*models.User) error
+	LookUpUser(*models.User) (string, bool)
 }
 
 type dataBase struct {
@@ -62,4 +63,16 @@ func (db *dataBase) InsertUser(user *models.User) (err error) {
 	}
 
 	return nil
+}
+
+func (db *dataBase) LookUpUser(user *models.User) (id string, ok bool) {
+	out := &models.User{}
+	db.Find(out, user)
+
+	if out.ID != "" {
+
+		return out.ID, true
+	}
+
+	return "", false
 }

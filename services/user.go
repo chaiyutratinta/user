@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"user/models"
 	"user/repositories"
 	"user/utils"
@@ -12,6 +13,7 @@ import (
 
 type UserServices interface {
 	CreateUser(*models.Body) (models.Token, error)
+	ValidateUser(*models.Body) (models.Token, bool)
 }
 
 type user struct {
@@ -67,4 +69,35 @@ func (u *user) CreateUser(body *models.Body) (token models.Token, err error) {
 	token, err = utils.Token(userID, "all")
 
 	return
+}
+
+func (u *user) ValidateUser(body *models.Body) (token models.Token, ok bool) {
+	passSha1, err := utils.Hash(body.Password)
+
+	if err != nil {
+		log.Println(err)
+
+		return models.Token(""), false
+	}
+
+	userID, userFound := u.LookUpUser(&models.User{
+		UserName: body.UserName,
+		Email:    body.Email,
+		Password: passSha1,
+	})
+
+	if !userFound {
+
+		return models.Token(""), false
+	}
+
+	token, err = utils.Token(userID, "all")
+
+	if err != nil {
+		log.Println(err)
+
+		return models.Token(""), false
+	}
+
+	return token, true
 }
