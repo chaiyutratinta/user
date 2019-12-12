@@ -3,7 +3,6 @@ package utils
 import (
 	"crypto/md5"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"time"
 	"user/models"
@@ -17,14 +16,7 @@ type Claims struct {
 }
 
 func Token(userID, scope string) (token models.Token, err error) {
-	key, err := ioutil.ReadFile("./signature")
-
-	if err != nil {
-		log.Panic(err)
-		token = ""
-
-		return
-	}
+	key := []byte("a40449d2a209f1ba700c20da616b01a2f360b39f97152aa384e01f54ecab17571c5311e5f83108bc57fc94ddcc2ba12530edc2db5f6a57458c8d330d6317307e")
 
 	duration, _ := time.ParseDuration("1h")
 	expDate := time.Now().Add(duration)
@@ -51,7 +43,7 @@ func Token(userID, scope string) (token models.Token, err error) {
 	return
 }
 
-func Hash(password string) (hashed string, err error) {
+func Hash(password string) (hashed string) {
 	mac := md5.New()
 	mac.Write([]byte(password))
 	hashed = fmt.Sprintf("%x", mac.Sum(nil))
