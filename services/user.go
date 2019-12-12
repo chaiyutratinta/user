@@ -64,7 +64,7 @@ func (u *user) CreateUser(body *models.Body) (token models.Token, err error) {
 	}
 
 	userID := (uuid.New()).String()
-	password, err := utils.Hash(body.Password)
+	password := utils.Hash(body.Password)
 	err = u.InsertUser(&models.User{
 		ID:       userID,
 		Email:    body.Email,
@@ -84,13 +84,7 @@ func (u *user) CreateUser(body *models.Body) (token models.Token, err error) {
 }
 
 func (u *user) ValidateUser(body *models.Body) (token models.Token, ok bool) {
-	passSha1, err := utils.Hash(body.Password)
-
-	if err != nil {
-		log.Println(err)
-
-		return models.Token(""), false
-	}
+	passSha1 := utils.Hash(body.Password)
 
 	userID, userFound := u.LookUpUser(&models.User{
 		UserName: body.UserName,
@@ -103,7 +97,7 @@ func (u *user) ValidateUser(body *models.Body) (token models.Token, ok bool) {
 		return models.Token(""), false
 	}
 
-	token, err = utils.Token(userID, "all")
+	token, err := utils.Token(userID, "all")
 
 	if err != nil {
 		log.Println(err)

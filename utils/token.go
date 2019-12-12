@@ -18,17 +18,15 @@ type Claims struct {
 func Token(userID, scope string) (token models.Token, err error) {
 	key := []byte("a40449d2a209f1ba700c20da616b01a2f360b39f97152aa384e01f54ecab17571c5311e5f83108bc57fc94ddcc2ba12530edc2db5f6a57458c8d330d6317307e")
 
-	duration, _ := time.ParseDuration("1h")
-	expDate := time.Now().Add(duration)
-	expAt := time.Until(expDate)
+	expireTime := time.Now().Add(60 * time.Minute).Unix()
 	claims := &Claims{
 		userID,
 		jwt.StandardClaims{
-			ExpiresAt: expAt.Milliseconds(),
+			ExpiresAt: expireTime,
 			Subject:   scope,
 		},
 	}
-	unsigned := jwt.NewWithClaims(jwt.GetSigningMethod("HS512"), claims)
+	unsigned := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedStr, err := unsigned.SignedString(key)
 
 	if err != nil {
