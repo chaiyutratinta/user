@@ -19,10 +19,13 @@ services:
   app:
     build: ./
     container_name: users_app
+    restart: on-failure
     ports:
       - "8080:8080"
     networks:
       - users
+    depends_on:
+        - db
 
 networks:
   users:
